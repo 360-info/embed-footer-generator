@@ -96,7 +96,9 @@
   import HelperText from '@smui/textfield/helper-text';
   import Select, { Option } from '@smui/select';
   import { fly } from 'svelte/transition';
-  import * as sanitizeHtml from 'sanitize-html';
+  // import * as sanitizeHtml from 'sanitize-html';
+  import sanitizeHtml from 'sanitize-html';
+  
 
   let inputEmbed = '';
   let inputByline = '';
@@ -113,11 +115,13 @@
     
     // manually escape the embed first so that we can show its code in the
     // rendered preview
-    // let escapedEmbed = sanitizeHtml(inputEmbed, {
-    //   allowedTags: false,
-    //   allowedAttributes: false,
-    //   disallowedTagsMode: "escape"
-    // });
+    let escapedEmbed = sanitizeHtml(inputEmbed, {
+      allowedTags: false,
+      allowedAttributes: false,
+      disallowedTagsMode: 'escape'
+    });
+    console.log('ESCAPED EMBED:');
+    console.log(escapedEmbed);
     
     // assemble the embed code block and the content link blocks
     // (conditional on there being content to add there)
@@ -126,7 +130,7 @@
       '  <details>\n' +
       '    <summary>Embed in your article</summary>\n' +
       '    <p>Copy the following code into your article:\n' +
-      '    <code>' + outputEmbed + '</code>\n' +
+      '    <code>' + escapedEmbed + '</code>\n' +
       '  </details>\n';
 
     let contentLinkBlock = (inputFileURL === "") ? "" :
