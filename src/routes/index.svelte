@@ -12,19 +12,26 @@
 -->
 
 
-<div class="columns">
+<p>To help our partners use + remix this content, either provide an <strong>embed code block</strong>, a <strong>link to any project files</strong>, or both.</p>
 
-  <div class="col">
+<LayoutGrid style="max-width: 1200px;">
+
+  <Cell span={6}>
 
     <h2>Input</h2>
-    <Textfield
-      style="width: 100%;"
-      helperLine$style="width: 100%;"
-      textarea
-      bind:value={inputEmbed}
-      label="Paste the original embed code in here"
-    >
-    </Textfield>
+
+    <h3>Embed (for videos and interactives)</h3>
+
+    <Paper color="outline" style="padding: 24px; outline: 3px dashed #eee; outline-offset: -12px; min-height: 200px;">
+      <Textfield
+        style="width: 100%; min-height: 200px;"
+        helperLine$style="width: 100%;"
+        textarea
+        bind:value={inputEmbed}
+        label="Paste the embed code from Superdesk in here"
+      >
+      </Textfield>
+    </Paper>
     
     <Textfield
       style="width: 100%;"
@@ -49,71 +56,97 @@
         eg. "https://github.com/360-info/example-project"
       </HelperText>
     </Textfield>
+    
+    <div>
+      <Select bind:value={selectedContentOption}
+        label="What describes the content?">
+        {#each contentOptions as menuItem}
+          <Option value={menuItem}>{menuItem}</Option>
+        {/each}
+      </Select>
+      <!-- <pre class="status">Selected: {selectedContentOption}</pre> -->
+    </div>
 
-  </div>
 
-  <div class="col">
-    <h2>Output</h2>
-    <Paper color="outline">
-      <code>{inputEmbed}</code>
-    </Paper>
-    <h2>Preview</h2>
-    {@html outputEmbed}
+  </Cell>
 
-  </div>
+  {#if (inputFileURL !== "") || (inputEmbed !== "")}
 
-</div>
+    <Cell span={6}>
+      <h2 transition:fly={{ y: 20, duration: 500 }}>Output (paste this into Superdesk)</h2>
+      <div transition:fly={{ y: 20, duration: 500 }}>
+        <Paper color="outline" style="min-height: 200px;">
+          <code>{outputEmbed}</code>
+        </Paper>
+      </div>
+      <h2 transition:fly={{ y: 20, duration: 500 }}>Preview</h2>
+      <div transition:fly={{ y: 20, duration: 500 }}>{@html outputEmbed}</div>
+    </Cell>
+
+  {/if}
+
+</LayoutGrid>
 
 <script lang="ts">
   // import Card, { Content } from '@smui/card';
+  import LayoutGrid, { Cell } from '@smui/layout-grid';
   import Paper, { Title, Content } from '@smui/paper';
   import Textfield from '@smui/textfield';
   import Icon from '@smui/textfield/icon';
   import HelperText from '@smui/textfield/helper-text';
+  import Select, { Option } from '@smui/select';
+  import { fly } from 'svelte/transition';
+  import * as sanitizeHtml from 'sanitize-html';
 
   let inputEmbed = '';
   let inputByline = '';
   let inputFileURL = '';
 
-  function concatEmbeds(a, b) {
-    return(a + b);
-  }
+  let contentOptions = ['project files', 'code', 'data', 'code and data',
+    'Other formats'];
+  let selectedContentOption = 'project files';
 
-  $: outputEmbed = concatEmbeds('IN: ', inputEmbed);
+  $: outputEmbed = renderOutputEmbed(inputEmbed, inputFileURL,
+    selectedContentOption, );
 
-  function concatStrings(a, b) {
-    a + b;
-  }
-
-  function renderOutputEmbed(inputEmbed, inputByline, inputFileURL) {
-
+  function renderOutputEmbed(inputEmbed, inputFileURL, selectedContentOption) {
     
-
-    // - original embed code
-    // - <details class="mycaption">
-
-    let outputEmbed = inputEmbed + '\n' +
-      '<details>\n' +
-      '  <summary>Use + remix this chart</summary>\n' +
-      '  <div style="border: 1px solid #999; color: #999; border-radius: 4px; padding: 8px;">\n' +
-      '    <h5>Embed this in your article</h5>\n' +
+    // manually escape the embed first so that we can show its code in the
+    // rendered preview
+    // let escapedEmbed = sanitizeHtml(inputEmbed, {
+    //   allowedTags: false,
+    //   allowedAttributes: false,
+    //   disallowedTagsMode: "escape"
+    // });
+    
+    // assemble the embed code block and the content link blocks
+    // (conditional on there being content to add there)
+    
+    let embedBlock = (inputEmbed === "") ? "" :
+      '  <details>\n' +
+      '    <summary>Embed in your article</summary>\n' +
       '    <p>Copy the following code into your article:\n' +
-      '    <code>' + inputEmbed + '</code>\n' 
+      '    <code>' + outputEmbed + '</code>\n' +
+      '  </details>\n';
 
+    let contentLinkBlock = (inputFileURL === "") ? "" :
+      '  <details>\n' +
+        '    <summary>Get the ' + selectedContentOption + '</summary>\n' +
+        '    <a href="' + inputFileURL + '">' + inputFileURL + '</a>\n' +
+        '  </details>\n';
 
-
-//       <div><div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="//cdn.iframe.ly/api/iframe?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DlVOE1Ft3knk&key=87ca3314a9fa775b5c3a7726100694b0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *;"></iframe></div></div>
-// <details class="mycaption">
-//   <summary>Use + remix this chart</summary>
-//   <div style="border: 1px solid #999; color: #999; border-radius: 4px; padding: 8px;">
-//     <p style="margin: 0;">Copy this code into your article:</p>
-//     <code style="font-size: 13px; margin: 0;">&lt;div&gt;&lt;div style=&quot;left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;&quot;&gt;&lt;iframe src=&quot;//cdn.iframe.ly/api/iframe?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DlVOE1Ft3knk&amp;key=87ca3314a9fa775b5c3a7726100694b0&quot; style=&quot;top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;&quot; allowfullscreen scrolling=&quot;no&quot; allow=&quot;accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *;&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;&lt;/div&gt;
-//     </code>
-//   </div>
-// </details>
-
-
+    return(
+      (inputEmbed === "") && (inputFileURL === "") ? "" :
+        inputEmbed + '\n' +
+        '<div style="border: 1px solid #999; color: #999; border-radius: 4px; padding: 8px;">\n' +
+        '  <details>\n' +
+        '    <summary>Use + remix this chart</summary>\n' +
+          embedBlock +
+          contentLinkBlock +
+        '  </details>' +
+        '</div>');
   }
+
 </script>
 
 <style>
@@ -122,12 +155,13 @@
     display: flex;
     flex-flow: row nowrap;
     width: 100%;
-    gap: 10px;
+    gap: 50px;
+
+    box-sizing: border-box;
+    padding: 50px;
   }
   .col {
-    flex-grow: 1;
+    flex: 1;
   }
-  .col + .col {
-    flex-grow: 2;
-  }
+
 </style>
