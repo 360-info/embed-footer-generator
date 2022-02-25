@@ -116,7 +116,7 @@
     // manually escape the embed first so that we can show its code in the
     // rendered preview
     let escapedEmbed = sanitizeHtml(inputEmbed, {
-      allowedTags: false,
+      allowedTags: [],
       allowedAttributes: false,
       disallowedTagsMode: 'escape'
     });
@@ -130,7 +130,7 @@
       '  <details>\n' +
       '    <summary>Embed in your article</summary>\n' +
       '    <p>Copy the following code into your article:\n' +
-      '    <code>' + escapedEmbed + '</code>\n' +
+      '    <div><code>' + escapedEmbed + '</code></div>\n' +
       '  </details>\n';
 
     let contentLinkBlock = (inputFileURL === "") ? "" :
