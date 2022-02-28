@@ -219,19 +219,3 @@
 
 </script>
 
-<style>
-  /* column layout */
-  .columns {
-    display: flex;
-    flex-flow: row nowrap;
-    width: 100%;
-    gap: 50px;
-
-    box-sizing: border-box;
-    padding: 50px;
-  }
-  .col {
-    flex: 1;
-  }
-
-</style>
