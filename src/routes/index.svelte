@@ -148,7 +148,7 @@
       allowedTags: [],
       allowedAttributes: false,
       disallowedTagsMode: 'escape'
-    });
+    }).replace('&', '&amp;');
 
   function renderUseRemixHeader() {
     return(
@@ -168,7 +168,7 @@
   }
 
   function renderEmbedBlockClose() {
-    return('</code>\n' + '</div></details>');
+    return('</code>\n</div></details>');
 
   }
 
