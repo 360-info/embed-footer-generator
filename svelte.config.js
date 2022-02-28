@@ -1,5 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 
+const dev = process.env.NODE_ENV === 'development';
+
 export default {
 	kit: {
 		adapter: adapter({
@@ -8,6 +10,9 @@ export default {
 			assets: 'docs',
 			fallback: null,
 			precompress: false
-		})
+		}),
+		paths: {
+			base: dev ? '' : '/embed-footer-generator',
+		},
 	}
 };
