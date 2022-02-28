@@ -76,11 +76,45 @@
       <h2 transition:fly={{ y: 20, duration: 500 }}>Output (paste this into Superdesk)</h2>
       <div transition:fly={{ y: 20, duration: 500 }}>
         <Paper color="outline" style="min-height: 200px;">
-          <code>{outputEmbed}</code>
+          <!-- what we actually need here is most stuff remdered, but the escapedInputEmbed inserted as is-->
+          <!--<code>{escapedOutputEmbed}</code>-->
+          <code>
+            {inputEmbed}
+            {renderUseRemixHeader()}
+            {#if (inputEmbed !== "")}
+            {renderEmbedBlockOpen()}{@html escapedInputEmbed}{renderEmbedBlockClose()}
+            {/if}
+            {#if (inputFileURL !== "")}
+            {renderContentLinkBlock(selectedContentOption, inputFileURL)}
+            {/if}
+            {renderUseRemixFooter()}
+          </code>
         </Paper>
       </div>
       <h2 transition:fly={{ y: 20, duration: 500 }}>Preview</h2>
-      <div transition:fly={{ y: 20, duration: 500 }}>{@html outputEmbed}</div>
+      <div transition:fly={{ y: 20, duration: 500 }}>
+        {@html inputEmbed}
+        <div style="border: 1px solid #999; color: #999; border-radius: 4px; padding: 12px;">
+          <details>
+            <summary>Use + remix this chart</summary>
+            <div style="padding: 16px 16px 0 16px; font-size: small;">
+              {#if (inputEmbed !== "")}
+              <details style="padding-bottom: 10px;">
+                <summary>Embed in your article</summary>
+                <p>Copy the following code into your article:
+                <div><code>{inputEmbed}</code></div>
+              </details>
+              {/if}
+              {#if (inputFileURL !== "")}
+              <details>
+                <summary>Get the {selectedContentOption}</summary>
+                <p style="margin-bottom: 0;"><a href="{inputFileURL}">{inputFileURL}</a></p>
+              </details>
+              {/if}
+            </div>
+          </details>
+        </div>  
+      </div>
     </Cell>
 
   {/if}
@@ -108,45 +142,77 @@
     'Other formats'];
   let selectedContentOption = 'project files';
 
-  $: outputEmbed = renderOutputEmbed(inputEmbed, inputFileURL,
-    selectedContentOption, );
-
-  function renderOutputEmbed(inputEmbed, inputFileURL, selectedContentOption) {
-    
-    // manually escape the embed first so that we can show its code in the
-    // rendered preview
-    let escapedEmbed = sanitizeHtml(inputEmbed, {
+  // manually escape the embed first so that we can show its code in the
+  // rendered preview
+  $: escapedInputEmbed = sanitizeHtml(inputEmbed, {
       allowedTags: [],
       allowedAttributes: false,
       disallowedTagsMode: 'escape'
     });
-    console.log('ESCAPED EMBED:');
-    console.log(escapedEmbed);
+
+  function renderUseRemixHeader() {
+    return(
+      '<div style="border: 1px solid #999; color: #999; border-radius: 4px; ' +
+      '  padding: 12px;">\n' +
+      '  <details>\n' +
+      '    <summary>Use + remix this chart</summary>\n' +
+      '    <div style="padding: 16px 16px 0 16px; font-size: small;">\n');
+  }
+
+  function renderEmbedBlockOpen() {
+    return(
+      '  <details style="padding-bottom: 10px;">\n' +
+      '    <summary>Embed in your article</summary>\n' +
+      '    <p>Copy the following code into your article:\n' +
+      '    <div><code>');
+  }
+
+  function renderEmbedBlockClose() {
+    return('</code>\n' + '</div></details>');
+
+  }
+
+  function renderContentLinkBlock(selectedContentOption, inputFileURL) {
+    return(
+      '  <details>\n' +
+      '    <summary>Get the ' + selectedContentOption + '</summary>\n' +
+      '    <p style="margin-bottom: 0;"><a href="' + inputFileURL + '">' +
+             inputFileURL + '</a></p>\n' +
+      '  </details>\n');
+  }
+
+  function renderUseRemixFooter() {
+    return('</div></details>');
+  }
+
+  function renderOutputEmbed(inputEmbed, inputFileURL, selectedContentOption) {
     
     // assemble the embed code block and the content link blocks
     // (conditional on there being content to add there)
     
     let embedBlock = (inputEmbed === "") ? "" :
-      '  <details>\n' +
+      '  <details style="padding-bottom: 10px;">\n' +
       '    <summary>Embed in your article</summary>\n' +
       '    <p>Copy the following code into your article:\n' +
-      '    <div><code>' + escapedEmbed + '</code></div>\n' +
+      '    <div><code>' + escapedInputEmbed + '</code></div>\n' +
       '  </details>\n';
 
     let contentLinkBlock = (inputFileURL === "") ? "" :
       '  <details>\n' +
         '    <summary>Get the ' + selectedContentOption + '</summary>\n' +
-        '    <a href="' + inputFileURL + '">' + inputFileURL + '</a>\n' +
+        '    <p style="margin-bottom: 0;"><a href="' + inputFileURL + '">' + inputFileURL + '</a></p>\n' +
         '  </details>\n';
 
     return(
       (inputEmbed === "") && (inputFileURL === "") ? "" :
         inputEmbed + '\n' +
-        '<div style="border: 1px solid #999; color: #999; border-radius: 4px; padding: 8px;">\n' +
+        '<div style="border: 1px solid #999; color: #999; border-radius: 4px; padding: 12px;">\n' +
         '  <details>\n' +
         '    <summary>Use + remix this chart</summary>\n' +
-          embedBlock +
-          contentLinkBlock +
+        '    <div style="padding: 16px 16px 0 16px; font-size: small;">\n' +
+              embedBlock +
+              contentLinkBlock +
+        '    </div>\n' +
         '  </details>' +
         '</div>');
   }
