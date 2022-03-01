@@ -1,6 +1,6 @@
 import adapter from '@sveltejs/adapter-static';
 
-const dev = process.env.NODE_ENV === 'development';
+const prod = process.env.NODE_ENV === "production";
 
 export default {
 	kit: {
@@ -12,7 +12,7 @@ export default {
 			precompress: false
 		}),
 		paths: {
-			base: dev ? '' : '/embed-footer-generator',
+			base: prod ? "/embed-footer-generator" : "",
 		},
 	}
 };
